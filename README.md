@@ -12,9 +12,8 @@ The sound files are from the similar
 
 Node.js version >= 22.6.0 is required.
 
-You can obtain it by using `nvm` (Node Version Manager). Download it from:
-
-# [NVM](https://github.com/nvm-sh/nvm)
+You can obtain it by using `nvm` (Node Version Manager). Download it from
+[NVM](https://github.com/nvm-sh/nvm)
 
 After installing `nvm`, you can install and use the required Node.js version
 like this:
@@ -24,15 +23,13 @@ nvm install 22.6.0
 nvm use 22.6.0
 ```
 
-Alternatively you can download and install it globally:
-
-# [Node.js](https://nodejs.org/en/download/)
+Alternatively you can download and install it globally from
+[Node.js](https://nodejs.org/en/download/).
 
 ## Installation
 
-# Install [Node.js](https://nodejs.org/en/download/)
-
-# Run `npm install` in the project directory
+1. Install [Node.js](https://nodejs.org/en/download/)
+2. Run `npm install` in the project directory
 
 ## Configuration
 
@@ -55,13 +52,10 @@ computer, if you are accessing the application from another device.
 
 ## Running
 
-# Start MeOS and open the competition you want to announce
-
-# Start the MeOS "Informationsserver" under the "Automater" tab.
-
-# Run `npm start` in the project directory
-
-# Open a web browser and go to `http://localhost:3001`
+1. Start MeOS and open the competition you want to announce
+2. Start the MeOS "Informationsserver" under the "Automater" tab.
+3. Run `npm start` in the project directory
+4. Open a web browser and go to `http://localhost:3001`
 
 It should also be possible to access the application from a browser on another
 device on the same network. Replace `localhost` with the IP address of the
