@@ -3,35 +3,23 @@ import xml2js from "xml2js";
 
 import fs from "fs";
 import path from "path";
-import { meosXmlSchema } from "../schema.ts";
+import { meosXmlSchema, punchSchema } from "../schema.ts";
 import { z } from "zod";
 
 const parser = new xml2js.Parser();
 
 interface Competitor {
-  card: string;
-  name: string;
+  card?: string;
+  name?: string;
 }
 
 interface Team {
   id: string;
-  bibNumber: string;
+  bibNumber?: string;
   runners: string[][]; // [leg][competitorIds]
 }
 
-interface MeOSRadioPunch {
-  id: string;
-
-  bibNumber: string;
-  leg: number;
-  legRunner: number;
-  punchTime: Date;
-
-  control: string;
-  runnerId: string;
-  runnerName: string;
-}
-
+type Punch = z.infer<typeof punchSchema>;
 
 export const createMeosFetcher = async (host: string) => {
   let lastXml: string;
@@ -39,18 +27,14 @@ export const createMeosFetcher = async (host: string) => {
   const teams = new Map<string, Team>();
   const competitors = new Map<string, Competitor>();
   let nextdifference: string = "zero";
-  //let competitionDate: Date | null = null;
 
-  const radioPunches = new Map<string, MeOSRadioPunch>();
+  const allPunches = new Map<string, Punch>();
 
-  async function updateMeOSData(
-    onNewPunchCallback?: (punch: MeOSRadioPunch) => void,
-  ) {
+  async function updateMeOSData(onNewPunchCallback?: (punch: Punch) => void) {
     const midnight = new Date();
     midnight.setHours(0, 0, 0, 0);
-    let res;
+    let res: Response;
     try {
-      // res = await fetchMock();
       res = await fetch(`http://${host}/meos?difference=${nextdifference}`);
     } catch (err) {
       console.error(
@@ -173,7 +157,12 @@ export const createMeosFetcher = async (host: string) => {
           continue;
         }
 
-        const st = parseInt(cmp.base.at(0)?.$.st);
+        const stStr = cmp?.base?.at(0)?.$.st;
+        if (typeof stStr !== "string") {
+          continue;
+        }
+
+        const st = parseInt(stStr);
 
         if (!cmp.radio) {
           continue;
@@ -189,21 +178,18 @@ export const createMeosFetcher = async (host: string) => {
           const punchTimeDeciSeconds = st + rt;
           const punchTimeMs = punchTimeDeciSeconds * 100;
 
-          const punchTime = new Date(midnight);
-          punchTime.setMilliseconds(punchTime.getMilliseconds() + punchTimeMs);
-
           const leg = team.runners.findIndex((leg) => leg.includes(cmp.$.id));
           const legRunner = team.runners[leg].indexOf(cmp.$.id);
           const punchId = `${ctrl}:${leg}:${legRunner}:${team.bibNumber}:${
             competitor.card || "-"
           }`;
 
-          if (!radioPunches.has(punchId)) {
+          if (!allPunches.has(punchId)) {
             const newPunch = {
               id: punchId,
               control: ctrl,
               bibNumber: team.bibNumber,
-              punchTime,
+              punchTime: punchTimeMs,
               leg,
               legRunner,
               runnerId: cmp.$.id,
@@ -212,7 +198,7 @@ export const createMeosFetcher = async (host: string) => {
 
             console.log(`  New punch: ${newPunch.id}`);
 
-            radioPunches.set(punchId, newPunch);
+            allPunches.set(punchId, newPunch);
 
             onNewPunchCallback?.(newPunch);
           }
@@ -221,7 +207,7 @@ export const createMeosFetcher = async (host: string) => {
     }
   }
 
-  function startPoll(onNewPunchCallback: (punch: MeOSRadioPunch) => void) {
+  function startPoll(onNewPunchCallback: (punch: Punch) => void) {
     updateMeOSData(onNewPunchCallback);
     setInterval(() => {
       updateMeOSData(onNewPunchCallback);
@@ -232,7 +218,7 @@ export const createMeosFetcher = async (host: string) => {
   await updateMeOSData();
 
   return {
-    getAllPunches: () => [...radioPunches.values()],
+    getAllPunches: () => [...allPunches.values()],
     startPoll,
   };
 };

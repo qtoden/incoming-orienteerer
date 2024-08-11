@@ -22,10 +22,10 @@ export const punchSchema = z.object({
   bibNumber: z.string(),
   leg: z.number(),
   legRunner: z.number(),
-  punchTime: z.string().datetime(),
+  punchTime: z.number(),
   control: z.string(),
   runnerId: z.string(),
-  runnerName: z.string(),
+  runnerName: z.string().optional(),
 });
 
 export const punchEventSchema = z.object({
