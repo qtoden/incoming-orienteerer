@@ -1,0 +1,16 @@
+{
+  "meosHost": "localhost:2009",
+  "controls": ["200"],
+  "gridWidth": 3,
+  "gridHeight": 4,
+  "margin": 10,
+  "gap": 10,
+  "borderWidth": 5,
+  "borderRadius": 5,
+  "bibFontSize": "150pt",
+  "legFontSize": "36pt",
+  "fontFamily": "Arial,sans-serif",
+  "fontWeight": "normal",
+  "bibTextColor": ["black", "red", "black"],
+  "bgColor": ["white", "white", "yellow"]
+}
