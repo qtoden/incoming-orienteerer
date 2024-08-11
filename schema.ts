@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const settingsSchema = z.object({
   meosHost: z.string().default("http://localhost:8080"),
-  controls: z.array(z.number()).default([200]),
+  controls: z.array(z.string()).default(["200"]),
   gridWidth: z.number().default(4),
   gridHeight: z.number().default(4),
   margin: z.number().default(10),

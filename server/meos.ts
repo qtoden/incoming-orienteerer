@@ -5,6 +5,7 @@ import fs from "fs";
 import path from "path";
 import { meosXmlSchema, punchSchema } from "../schema.ts";
 import { z } from "zod";
+import { settings } from "./settings.ts";
 
 const parser = new xml2js.Parser();
 
@@ -177,6 +178,11 @@ export const createMeosFetcher = async (host: string) => {
         for (const visit of visits) {
           const parts = visit.split(",");
           const ctrl = parts[0];
+
+          if (!settings.controls.includes(ctrl)) {
+            continue
+          }
+
           const rt = parseInt(parts[1]);
 
           const punchTimeDeciSeconds = st + rt;
