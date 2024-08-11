@@ -46,6 +46,11 @@ export function applyStyles(appContainer: HTMLElement, settings: z.infer<typeof 
       continue;
     }
 
+    const inner = bib.querySelector(".bib-inner");
+    if (!(inner instanceof HTMLElement)) {
+      continue;
+    }
+
     const x = i % settings.gridWidth;
     const y = Math.floor(i / settings.gridWidth);
 
@@ -66,9 +71,9 @@ export function applyStyles(appContainer: HTMLElement, settings: z.infer<typeof 
     bib.style.transform = `translate(${xPx}px, ${yPx}px)`;
     bib.style.width = `${itemWidth}px`;
     bib.style.height = `${itemHeight}px`;
-    bib.style.borderStyle = "solid";
-    bib.style.borderColor = "black";
-    bib.style.color = settings.bibTextColor[leg % settings.bibTextColor.length];
-    bib.style.backgroundColor = settings.bgColor[leg % settings.bgColor.length];
+    inner.style.borderStyle = "solid";
+    inner.style.borderColor = "black";
+    inner.style.color = settings.bibTextColor[leg % settings.bibTextColor.length];
+    inner.style.backgroundColor = settings.bgColor[leg % settings.bgColor.length];
   }
 }

@@ -3,6 +3,11 @@
 This is a web application for announcing orienteerers passing at a relay
 control. Data is read from MeOS.
 
+## Acknowledgements
+
+The sound files are from the similar
+[prewarning](https://github.com/croister/prewarning) project.
+
 ## Requirements
 
 Node.js version >= 22.6.0 is required.

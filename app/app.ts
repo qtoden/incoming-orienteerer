@@ -46,15 +46,19 @@ function addBib(punch: z.infer<typeof punchSchema>) {
   bibElement.setAttribute("data-bib", punch.id);
   bibElement.setAttribute("data-leg", punch.leg.toString());
 
+  const innerBibElement = document.createElement("div");
+  innerBibElement.classList.add("bib-inner");
+  bibElement.appendChild(innerBibElement);
+
   const bibNumberElement = document.createElement("div");
   bibNumberElement.classList.add("bib-number");
   bibNumberElement.textContent = punch.bibNumber;
-  bibElement.appendChild(bibNumberElement);
+  innerBibElement.appendChild(bibNumberElement);
 
   const legNumberElement = document.createElement("div");
   legNumberElement.classList.add("leg-number");
   legNumberElement.textContent = String(punch.leg + 1);
-  bibElement.appendChild(legNumberElement);
+  innerBibElement.appendChild(legNumberElement);
 
   appContainer?.prepend(bibElement);
 
