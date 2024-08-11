@@ -69,3 +69,8 @@ host computer.
 You can use the MeOS backup in `test/relay.meosxml`. Load it in MeOS to get a
 simple competition with a few controls and teams. In MeOS you can manually
 enter passing times under the "Speaker" tab.
+
+## Logs
+
+Data fetched from MeOS is logged to the `logs` folder. This folder might grow
+with time, so it might be a good idea to delete old logs.
