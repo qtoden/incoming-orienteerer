@@ -3,6 +3,8 @@ import xml2js from "xml2js";
 
 import fs from "fs";
 import path from "path";
+import { meosXmlSchema } from "../schema.ts";
+import { z } from "zod";
 
 const parser = new xml2js.Parser();
 
@@ -30,124 +32,6 @@ interface MeOSRadioPunch {
   runnerName: string;
 }
 
-interface CommonXml {
-  /** competition */
-  competition: [
-    {
-      /** name */
-      _: string;
-      $: {
-        date: string; // YYYY-MM-dd
-        organizer: string;
-        homepage: string;
-      };
-    },
-  ];
-  /** radio controls */
-  ctrl: {
-    /** name */
-    _: string;
-    $: {
-      id: string;
-    };
-  }[];
-  /** classes */
-  cls: {
-    /** name */
-    _: string;
-    $: {
-      id: string;
-      ord: string;
-      /** comma separated radio control ids */
-      radio: string;
-    };
-  }[];
-  /** organizations (clubs) */
-  org: {
-    /** name */
-    _: string;
-    $: {
-      id: string;
-      nat: string;
-    };
-  }[];
-  /** teams */
-  tm: {
-    $: {
-      id: string;
-      delete?: boolean;
-    };
-    base: [
-      {
-        /** team name */
-        _: string;
-        $: {
-          org?: string;
-          cls?: string;
-          stat?: string;
-          st?: string;
-          rt?: string;
-          bib?: string;
-        };
-      },
-    ];
-    /* semi-colon separated runner ids */
-    r: string[];
-  }[];
-  cmp: {
-    $: {
-      id: string;
-      card?: string;
-      delete?: boolean;
-    };
-    base?: [
-      {
-        /** name */
-        _: string;
-        $: {
-          /** organization id */
-          org: string;
-          /** class id */
-          cls: string;
-          /** status numbers 0-99 */
-          stat: string;
-          /** start time, tenth of seconds since 00:00:00 */
-          st: string;
-          /** running time, tenth of seconds since st */
-          rt: string;
-        };
-      },
-    ];
-    /**
-     * radio visits:
-     * ctrl,rt;ctrl,rt;ctrl,rt
-     */
-    radio: [string];
-    /* ? is this for multi-day events? */
-    input: [
-      {
-        it: string;
-        tstst: string;
-      },
-    ];
-  }[];
-}
-
-interface MOPComplete extends CommonXml {
-  $: { xmlns: "http://www.melin.nu/mop"; nextdifference: string };
-}
-
-interface ParsedMOPComplete {
-  MOPComplete: MOPComplete;
-}
-
-interface MOPDiff extends CommonXml {
-  $: { nextdifference: string };
-}
-
-interface ParsedMOPDiff {
-  MOPDiff: MOPDiff;
-}
 
 export const createMeosFetcher = async (host: string) => {
   let lastXml: string;
@@ -188,7 +72,7 @@ export const createMeosFetcher = async (host: string) => {
 
     logXml(xml, nextdifference);
 
-    let result: ParsedMOPComplete | ParsedMOPDiff;
+    let result: unknown;
     try {
       result = await parser.parseStringPromise(xml);
     } catch (err) {
@@ -199,19 +83,34 @@ export const createMeosFetcher = async (host: string) => {
       return;
     }
 
-    let data: ParsedMOPComplete["MOPComplete"] | ParsedMOPDiff["MOPDiff"];
+    console.dir(result, { depth: null });
+    let parsed: z.infer<typeof meosXmlSchema>;
 
-    if ("MOPComplete" in result) {
-      data = result.MOPComplete;
-    } else if ("MOPDiff" in result) {
-      data = result.MOPDiff;
+    try {
+      parsed = meosXmlSchema.parse(result);
+    } catch (err) {
+      console.warn(
+        "Failed to validate XML, restarting with nextdifference=zero",
+      );
+      console.dir(err, { depth: null });
+      teams.clear();
+      competitors.clear();
+      nextdifference = "zero";
+      return;
     }
 
-    nextdifference = data.$.nextdifference;
+    let data =
+      "MOPComplete" in parsed
+        ? parsed.MOPComplete
+        : "MOPDiff" in parsed
+          ? parsed.MOPDiff
+          : undefined;
 
     if (!data) {
       return;
     }
+
+    nextdifference = data.$.nextdifference;
 
     if (data.tm) {
       for (const tm of data.tm) {
@@ -224,13 +123,13 @@ export const createMeosFetcher = async (host: string) => {
           continue;
         }
 
-        const runners = (tm?.r[0] || "")
+        const runners = (tm?.r?.at(0) || "")
           .split(";")
           .map((leg) => leg.split(","));
 
         const team = {
           id: tm.$.id,
-          bibNumber: tm.base[0].$.bib,
+          bibNumber: tm?.base?.at(0)?.$.bib,
           runners,
         };
         teams.set(tm.$.id, team);
@@ -251,14 +150,14 @@ export const createMeosFetcher = async (host: string) => {
           continue;
         }
 
-        let currentCard;
+        let currentCard: string | undefined;
         if (competitors.has(cmp.$.id)) {
           currentCard = competitors.get(cmp.$.id)?.card;
         }
 
         const competitor = {
           card: typeof cmp.$.card === "string" ? cmp.$.card : currentCard,
-          name: cmp.base[0]._,
+          name: cmp.base?.at(0)?._,
         };
 
         competitors.set(cmp.$.id, competitor);
@@ -274,7 +173,7 @@ export const createMeosFetcher = async (host: string) => {
           continue;
         }
 
-        const st = parseInt(cmp.base[0].$.st);
+        const st = parseInt(cmp.base.at(0)?.$.st);
 
         if (!cmp.radio) {
           continue;
@@ -308,7 +207,7 @@ export const createMeosFetcher = async (host: string) => {
               leg,
               legRunner,
               runnerId: cmp.$.id,
-              runnerName: cmp.base[0]._,
+              runnerName: cmp.base?.at(0)?._,
             };
 
             console.log(`  New punch: ${newPunch.id}`);

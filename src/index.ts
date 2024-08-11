@@ -3,7 +3,6 @@ import fs from "fs/promises";
 import path from "path";
 import * as esbuild from "esbuild";
 import { createMeosFetcher } from "./meos.ts";
-import { settingsSchema } from "../schema.ts";
 
 import { settings } from "./settings.ts";
 
@@ -23,8 +22,7 @@ async function buildApp() {
 
 const sseConnections = new Set<http.ServerResponse>();
 
-const { getAllPunches, startPoll } =
-  await createMeosFetcher(settings.meosHost);
+const { getAllPunches, startPoll } = await createMeosFetcher(settings.meosHost);
 
 startPoll((punch) => {
   console.log("Broadcast", punch);
