@@ -32,7 +32,10 @@ Alternatively you can download and install it globally from
 2. Run `npm install` in the project directory
 
 ## Configuration
+Edit `settings.json` to configure the application.
+Available settings can be seen in the `schema.ts` file.
 
+## Browser configuration
 Allow audio to be automatically played in the client web browser.
 
 ### Chrome
