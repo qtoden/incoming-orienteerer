@@ -1,0 +1,28 @@
+{
+  "name": "incoming-orienteerer",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "type": "module",
+  "engines": {
+    "node": ">=22.6.0"
+  },
+  "scripts": {
+    "start": "node --experimental-strip-types index.ts",
+    "dev": "nodemon",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Björn Norrliden <bjorn.norrliden@gmail.com>",
+  "license": "UNLICENSED",
+  "description": "",
+  "devDependencies": {
+    "@types/node": "^22.2.0",
+    "@types/xml2js": "^0.4.14",
+    "esbuild": "0.23.0",
+    "nodemon": "^3.1.4"
+  },
+  "dependencies": {
+    "mkdirp": "^3.0.1",
+    "xml2js": "^0.6.2",
+    "zod": "^3.23.8"
+  }
+}

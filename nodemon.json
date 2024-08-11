@@ -1,0 +1,6 @@
+{
+  "verbose": true,
+  "exec": "node --experimental-strip-types src/index.ts",
+  "ignore": ["node_modules", "bundle/**"],
+  "ext": "ts,js,json,md,css"
+}
