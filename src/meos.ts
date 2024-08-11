@@ -152,7 +152,12 @@ export const createMeosFetcher = async (host: string) => {
           return team.runners.some((leg) => leg.includes(cmp.$.id));
         });
 
-        if (!team?.bibNumber) {
+        if (!team) {
+          console.log("  Not part of any team");
+          continue;
+        }
+
+        if (!team.bibNumber) {
           console.warn("  Part of team but missing bib number");
           continue;
         }
