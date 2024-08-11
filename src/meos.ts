@@ -67,7 +67,6 @@ export const createMeosFetcher = async (host: string) => {
       return;
     }
 
-    console.dir(result, { depth: null });
     let parsed: z.infer<typeof meosXmlSchema>;
 
     try {

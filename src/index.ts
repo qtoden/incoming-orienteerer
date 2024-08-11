@@ -25,7 +25,6 @@ const sseConnections = new Set<http.ServerResponse>();
 const { getAllPunches, startPoll } = await createMeosFetcher(settings.meosHost);
 
 startPoll((punch) => {
-  console.log("Broadcast", punch);
   for (const connection of sseConnections) {
     connection.write(
       `data: ${JSON.stringify({ type: "punch", data: punch })}\n\n`,
@@ -34,7 +33,7 @@ startPoll((punch) => {
 });
 
 const server = http.createServer(async (req, res) => {
-  console.log(`Request URL: ${req.url}`);
+  console.log(`Incoming HTTP request: ${req.url}`);
   if (req.url === "/") {
     const indexHtml = await fs.readFile(
       path.resolve(import.meta.dirname, "../app/index.html"),
