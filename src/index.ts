@@ -86,7 +86,10 @@ const server = http.createServer(async (req, res) => {
       throw err;
     }
 
-    res.writeHead(200, { "Content-Type": "audio/mp3" });
+    res.writeHead(200, {
+      "Content-Type": "audio/mp3",
+      "Cache-Control": "public, max-age=86400", // tell browser to cache the mp3 for 24 hours
+    });
     res.write(mp3);
     res.end();
   } else if (req.url === "/sse") {
